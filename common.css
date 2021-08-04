@@ -1,28 +1,280 @@
+/***************************************************************/
+/* ------------------------ VARIABLES ------------------------ */
+/***************************************************************/
+:root {
+  --black:         #000000;
+  --black-light:   #111113;
+  --asphalt:       #313335;
+  --asphalt-dark:  #262729;
+  --asphalt-light: #4b4f52;
+  --grey:          #a6aaad;
+  --grey-dark:     #757575;
+  --grey-light:    #cdcfd1;
+  --smoke:         #f5f5f5;
+  --smoke-dark:    #ebebeb;
+  --smoke-light:   #f7f7f7;
+  --white:         #ffffff;
+  --backlot:       #f4c40e;
+  --backlot-dark:  #e6b10d;
+  --backlot-light: #fece35;
+  
+  --topbar:        4px;
+  --bottombar:     80px;
+  --hud:           24vh;
+  --hud-smaller:   12vh;
+  --hud-larger:    48vh;
+  --distance:      16px;
+  --border:        4px;
+  --icon:          32px;
+}
 
-/****************************************/
-/* common styles used for v1 through v4 */
-/****************************************/
+/***************************************************************/
+/* ------------------------- GLOBAL -------------------------- */
+/***************************************************************/
+@font-face {
+    font-family: 'PressStart2P';
+    src: url('fonts/PressStart2P.ttf');
+}
 
-body          { font-family: Arial, Helvetica, sans-serif; }
+* {
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding: 0;
+}
+
+body,
+html {
+  background-color: var(--black-light);
+  font-family: Arial, Helvetica, sans-serif;
+  overflow: hidden;
+}
+
+#wrapper {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/***************************************************************/
+/* ------------------------- LAYOUT -------------------------- */
+/***************************************************************/
+/* Topbar */
+#header {
+  align-items: center;
+  background-color: var(--backlot);
+  display: flex;
+  height: var(--topbar);
+  justify-content: space-between;
+  position: relative;
+  width: 100%;
+  z-index: 1;
+}
+/* Content */
+#content {
+  height: calc(100vh - var(--bottombar) - var(--topbar));
+  width: 100%;
+  z-index: 0;
+}
+#content #racer,
+#content #canvas {
+  height: 100%;
+  position: relative;
+  width: fit-content;
+}
+#content #racer {
+  z-index: 0;
+}
+#content #canvas {
+  background-color: var(--black);
+  object-fit: contain;
+  z-index: 0;
+}
+/* Bottombar */
+#bottombar {
+  align-items: center;
+  background-color: var(--asphalt-dark);
+  display: flex;
+  height: var(--bottombar);
+  justify-content: flex-start;
+  padding: var(--distance);
+  width: 100%;
+  z-index: 0;
+}
+
+/***************************************************************/
+/* -------------------------- GAME --------------------------- */
+/***************************************************************/
+/* Hud */
+#hud {
+  background-color: transparent;
+  color: var(--black);
+  font-family: 'PressStart2P', cursive;
+  height: 100%;
+  padding: var(--distance);
+  position: absolute;
+  width: 100%;
+  z-index: 1;
+}
+/* Speedometer */
+#hud #speed {
+  align-items: center;
+  border-radius: 100% 0 0 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  height: var(--hud);
+  justify-content: center;
+  overflow: hidden;
+  position: absolute;
+  right: 0;
+  width: var(--hud);
+}
+#hud #speed::before {
+  background: radial-gradient(circle, var(--black) 0%, transparent 80%);
+  border-radius: 100%;
+  content: '';
+  height: 200%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 200%;
+  z-index: 0;
+}
+#hud #speed::after {
+  border-left: var(--border) dashed var(--white);
+  border-radius: 100%;
+  border-top: var(--border) dashed var(--backlot);
+  content: '';
+  height: calc(200% - var(--distance) * 2);
+  left: var(--distance);
+  position: absolute;
+  top: var(--distance);
+  width: calc(200% - var(--distance) * 2);
+  z-index: 1;
+}
+#hud #speed .value {
+  color: var(--white);
+  font-size: 4vh;
+  height: 100%;
+  padding: 16vh var(--distance) var(--distance) 8vh;
+  position: relative;
+  text-align: right;
+  width: 100%;
+  z-index: 2;
+}
+#hud #speed .value::after {
+  color: var(--grey);
+  bottom: var(--distance);
+  content: ' mph';
+  font-size: 1vh;
+  position: absolute;
+  right: var(--distance);
+}
+/* Lap Time */
+#hud #current_lap_time {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  height: var(--hud-smaller);
+  justify-content: center;
+  overflow: hidden;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+}
+#hud #current_lap_time .value {
+  color: var(--white);
+  font-size: 4vh;
+  text-shadow: 0 0 var(--distance) var(--black);
+}
+/* Laps */
+#hud #lap_time {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  height: var(--hud-smaller);
+  justify-content: center;
+  overflow: hidden;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  text-align: left;
+  width: var(--hud-larger);
+}
+#hud #lap_time::before {
+  background: linear-gradient(90deg, var(--black) 0%, transparent 80%);
+  content: '';
+  height: 100%;
+  left: -50%;
+  position: absolute;
+  top: 0;
+  width: 150%;
+  z-index: 0;
+}
+#hud #last_lap_time,
+#hud #fast_lap_time {
+  color: var(--grey);
+  font-size: 1vh;
+  height: 2vh;
+  line-height: 2vh;
+  padding: 0 var(--distance);
+  position: relative;
+  text-align: left;
+  width: 100%;
+  z-index: 2;
+}
+#hud #last_lap_time .value,
+#hud #fast_lap_time .value {
+  color: var(--white);
+}
+
+/***************************************************************/
+/* ------------------------ CONTROLS ------------------------- */
+/***************************************************************/
+/* Mute button */
+#mute {
+  height: var(--icon);
+  position: absolute;
+  right: var(--distance);
+  top: var(--distance);
+  width: var(--icon);
+}
+#mute {
+  appearance: none;
+  background-position: 0 0;
+  background: url('images/mute.png');
+  border: none;
+  cursor: pointer;
+  display: block;
+  font-size: 0;
+  transition: transform 200ms ease;
+}
+#mute.on {
+  background-position: -32px 0;
+}
+#mute:focus,
+#mute:hover,
+#mute:active {
+  outline: none;
+}
+#mute:hover {
+  transform: scale(1.1);
+}
+/* Instructions */
+#instructions {
+  color: var(--smoke-dark);
+  width: 100%;
+}
+
+
+
+#lanes, #controls { display: none; }
+
+
 #stats        { border: 2px solid black; }
 #controls     { width: 28em; float: left; padding: 1em; font-size: 0.7em; }
 #controls th  { text-align: right; vertical-align: middle; }
-#instructions { clear: left; float: left; width: 17em; padding: 1em; border: 1px solid black; box-shadow: 0 0 5px black; }
-#racer        { position: relative; z-index: 0; width: 640px; height: 480px; margin-left: 20em; border: 2px solid black; }
-#canvas       { position: absolute; z-index: 0; width: 640px; height: 480px; z-index: 0; background-color: #72D7EE; }
-#mute         { background-position:   0px 0px; width: 32px; height: 32px; background: url(images/mute.png); display: inline-block; cursor: pointer; position: absolute; margin-left: 20em; }
-#mute.on      { background-position: -32px 0px; }
-
-/**************************************************/
-/* rudimentary heads up display (only used in v4) */
-/**************************************************/
-
-#hud                   { position: absolute; z-index: 1; width: 640px; padding: 5px 0; font-family: Verdana, Geneva, sans-serif; font-size: 0.8em; background-color: rgba(255,0,0,0.4); color: black; border-bottom: 2px solid black; box-sizing: border-box; -moz-box-sizing: border-box; -webkit-box-sizing: border-box; }
-#hud .hud              { background-color: rgba(255,255,255,0.6); padding: 5px; border: 1px solid black; margin: 0 5px; transition-property: background-color; transition-duration: 2s; -webkit-transition-property: background-color; -webkit-transition-duration: 2s; }
-#hud #speed            { float: right; }
-#hud #current_lap_time { float: left;  }
-#hud #last_lap_time    { float: left; display: none;  }
-#hud #fast_lap_time    { display: block; width: 12em;  margin: 0 auto; text-align: center; transition-property: background-color; transition-duration: 2s; -webkit-transition-property: background-color; -webkit-transition-duration: 2s; }
-#hud .value            { color: black; font-weight: bold; }
-#hud .fastest          { background-color: rgba(255,215,0,0.5); }
-
