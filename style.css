@@ -267,6 +267,10 @@ html {
   color: var(--smoke-dark);
   width: 100%;
 }
+/* Options */
+#controls {
+  display: none;
+}
 /* FPS */
 #fps-box {
   align-items: center;
@@ -316,5 +320,3 @@ html {
   height: var(--icon);
   width: 1px;
 }
-
-#lanes, #controls { display: none; }
