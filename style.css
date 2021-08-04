@@ -17,6 +17,7 @@
   --backlot:       #f4c40e;
   --backlot-dark:  #e6b10d;
   --backlot-light: #fece35;
+  --background:    #ede096;
   
   --topbar:        4px;
   --bottombar:     80px;
@@ -88,7 +89,7 @@ html {
   z-index: 0;
 }
 #content #canvas {
-  background-color: var(--black);
+  background-color: var(--background);
   object-fit: contain;
   z-index: 0;
 }
