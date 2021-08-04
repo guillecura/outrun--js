@@ -4,7 +4,7 @@
   <head>
     <title>Outrun JS</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <link href="common.css" rel="stylesheet" type="text/css" />
+    <link href="style.css" rel="stylesheet" type="text/css" />
   </head> 
 
   <body> 
@@ -41,9 +41,7 @@
             </div>
           </div>
           <!-- Game -->
-          <canvas id="canvas">
-            Sorry, there was an error loading the canvas.
-          </canvas>
+          <canvas id="canvas">Sorry, there was an error loading the canvas.</canvas>
         </div>
       </main>
       
@@ -55,20 +53,17 @@
         </div>
         <!-- Change Res -->
         <select id="resolution">
-          <option value='fine'>High-Res</option>
-          <option selected value='high'>Mid-Res</option>
+          <option selected value='fine'>High-Res</option>
+          <option value='high'>Mid-Res</option>
           <option value='low'>Low-Res</option>
         </select>
         <!-- FPS meter -->
-        <div id="fps"></div>
+        <div id="fps-box"></div>
       </footer>
     </div>
 
     <select id="lanes">
-      <option>1</option>
-      <option>2</option>
       <option selected>3</option>
-      <option>4</option>
     </select>
     <table id="controls">
       <tr>
@@ -95,8 +90,8 @@
 
     <script src="stats.js"></script>
     <script src="common.js"></script>
+    
     <script>
-
       var fps            = 60;                      // how many 'update' frames per second
       var step           = 1/fps;                   // how long is each frame (in seconds)
       var width          = 1024;                    // logical canvas width
@@ -111,7 +106,7 @@
       var treeOffset     = 0;                       // current tree scroll offset
       var segments       = [];                      // array of road segments
       var cars           = [];                      // array of cars on the road
-      var stats          = Game.stats('fps');       // mr.doobs FPS counter
+      var stats          = Game.stats('fps-box');   // mr.doobs FPS counter
       var canvas         = Dom.get('canvas');       // our canvas...
       var ctx            = canvas.getContext('2d'); // ...and its drawing context
       var background     = null;                    // our background image (loaded below)
@@ -156,9 +151,7 @@
       //=========================================================================
       // UPDATE THE GAME WORLD
       //=========================================================================
-
       function update(dt) {
-
         var n, car, carW, sprite, spriteW;
         var playerSegment = findSegment(position+playerZ);
         var playerW       = SPRITES.PLAYER_STRAIGHT.w * SPRITES.SCALE;
@@ -266,7 +259,6 @@
       }
 
       function updateCarOffset(car, carSegment, playerSegment, playerW) {
-
         var i, j, dir, segment, otherCar, otherCarW, lookahead = 20, carW = car.sprite.w * SPRITES.SCALE;
 
         // optimization, dont bother steering around other cars when 'out of sight' of the player
@@ -332,9 +324,7 @@
       //=========================================================================
       // RENDER THE GAME WORLD
       //=========================================================================
-
       function render() {
-
         var baseSegment   = findSegment(position);
         var basePercent   = Util.percentRemaining(position, segmentLength);
         var playerSegment = findSegment(position+playerZ);
@@ -354,7 +344,6 @@
         var n, i, segment, car, sprite, spriteScale, spriteX, spriteY;
 
         for(n = 0 ; n < drawDistance ; n++) {
-
           segment        = segments[(baseSegment.index + n) % segments.length];
           segment.looped = segment.index < baseSegment.index;
           segment.fog    = Util.exponentialFog(n/drawDistance, fogDensity);
@@ -422,7 +411,6 @@
       //=========================================================================
       // BUILD ROAD GEOMETRY
       //=========================================================================
-
       function lastY() { return (segments.length == 0) ? 0 : segments[segments.length-1].p2.world.y; }
 
       function addSegment(curve, y) {
@@ -611,7 +599,6 @@
       //=========================================================================
       // THE GAME LOOP
       //=========================================================================
-
       Game.run({
         canvas: canvas, render: render, update: update, stats: stats, step: step,
         images: ["background", "sprites"],
@@ -658,7 +645,6 @@
       //=========================================================================
       // TWEAK UI HANDLERS
       //=========================================================================
-
       Dom.on('resolution', 'change', function(ev) {
         var w, h, ratio;
         switch(ev.target.options[ev.target.selectedIndex].value) {
@@ -686,7 +672,6 @@
         Dom.get('currentFieldOfView').innerHTML    = Dom.get('fieldOfView').value    = fieldOfView;
         Dom.get('currentFogDensity').innerHTML     = Dom.get('fogDensity').value     = fogDensity;
       }
-
       //=========================================================================
     </script>
 

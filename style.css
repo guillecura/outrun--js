@@ -237,13 +237,6 @@ html {
 /***************************************************************/
 /* Mute button */
 #mute {
-  height: var(--icon);
-  position: absolute;
-  right: var(--distance);
-  top: var(--distance);
-  width: var(--icon);
-}
-#mute {
   appearance: none;
   background-position: 0 0;
   background: url('images/mute.png');
@@ -251,7 +244,12 @@ html {
   cursor: pointer;
   display: block;
   font-size: 0;
+  height: var(--icon);
+  position: absolute;
+  right: var(--distance);
+  top: var(--distance);
   transition: transform 200ms ease;
+  width: var(--icon);
 }
 #mute.on {
   background-position: -32px 0;
@@ -269,12 +267,54 @@ html {
   color: var(--smoke-dark);
   width: 100%;
 }
-
-
+/* FPS */
+#fps-box {
+  align-items: center;
+  display: flex;
+  justify-content: flex-end;
+}
+#fps-box > * {
+  min-width: var(--bottombar);
+  padding: var(--distance);
+  text-align: right;
+}
+#fps-box #stats {
+  flex-grow: 1;
+}
+#fps-box #fps,
+#fps-box #ms {
+  align-items: flex-end;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  margin: 0 0 0 auto;
+  width: var(--bottombar);
+}
+#fps-box #ms {
+  display: none;
+}
+#fps-box #fpsText,
+#fps-box #msText {
+  color: var(--grey);
+  font-size: 10px;
+  margin: 4px;
+  text-align: center;
+  width: 100%;
+}
+#fps-box #fpsGraph,
+#fps-box #msGraph {
+  background-color: var(--grey-dark);
+  height: var(--icon);
+  margin: 0;
+  position: relative;
+  width: 100%;
+}
+#fps-box #fpsGraph > span,
+#fps-box #msGraph > span {
+  background-color: var(--black-light);
+  float: left;
+  height: var(--icon);
+  width: 1px;
+}
 
 #lanes, #controls { display: none; }
-
-
-#stats        { border: 2px solid black; }
-#controls     { width: 28em; float: left; padding: 1em; font-size: 0.7em; }
-#controls th  { text-align: right; vertical-align: middle; }

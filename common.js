@@ -1,9 +1,7 @@
 //=========================================================================
 // minimalist DOM helpers
 //=========================================================================
-
 var Dom = {
-
   get:  function(id)                     { return ((id instanceof HTMLElement) || (id === document)) ? id : document.getElementById(id); },
   set:  function(id, html)               { Dom.get(id).innerHTML = html;                        },
   on:   function(ele, type, fn, capture) { Dom.get(ele).addEventListener(type, fn, capture);    },
@@ -32,9 +30,7 @@ var Dom = {
 //=========================================================================
 // general purpose helpers (mostly math)
 //=========================================================================
-
 var Util = {
-
   timestamp:        function()                  { return new Date().getTime();                                    },
   toInt:            function(obj, def)          { if (obj !== null) { var x = parseInt(obj, 10); if (!isNaN(x)) return x; } return Util.toInt(def, 0); },
   toFloat:          function(obj, def)          { if (obj !== null) { var x = parseFloat(obj);   if (!isNaN(x)) return x; } return Util.toFloat(def, 0.0); },
@@ -82,7 +78,6 @@ var Util = {
 //=========================================================================
 // POLYFILL for requestAnimationFrame
 //=========================================================================
-
 if (!window.requestAnimationFrame) { // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
   window.requestAnimationFrame = window.webkitRequestAnimationFrame || 
                                  window.mozRequestAnimationFrame    || 
@@ -96,13 +91,9 @@ if (!window.requestAnimationFrame) { // http://paulirish.com/2011/requestanimati
 //=========================================================================
 // GAME LOOP helpers
 //=========================================================================
-
 var Game = {  // a modified version of the game loop from my previous boulderdash game - see http://codeincomplete.com/posts/2011/10/25/javascript_boulderdash/#gameloop
-
   run: function(options) {
-
     Game.loadImages(options.images, function(images) {
-
       options.ready(images); // tell caller to initialize itself because images are loaded and we're ready to rumble
 
       Game.setKeyListener(options.keys);
@@ -176,27 +167,22 @@ var Game = {  // a modified version of the game loop from my previous boulderdas
   //---------------------------------------------------------------------------
 
   stats: function(parentId, id) { // construct mr.doobs FPS counter - along with friendly good/bad/ok message box
-
     var result = new Stats();
     result.domElement.id = id || 'stats';
     Dom.get(parentId).appendChild(result.domElement);
 
     var msg = document.createElement('div');
-    msg.style.cssText = "border: 2px solid gray; padding: 5px; margin-top: 5px; text-align: left; font-size: 1.15em; text-align: right;";
-    msg.innerHTML = "Your canvas performance is ";
     Dom.get(parentId).appendChild(msg);
 
     var value = document.createElement('span');
-    value.innerHTML = "...";
     msg.appendChild(value);
 
     setInterval(function() {
       var fps   = result.current();
       var ok    = (fps > 50) ? 'good'  : (fps < 30) ? 'bad' : 'ok';
-      var color = (fps > 50) ? 'green' : (fps < 30) ? 'red' : 'gray';
+      var color = (fps > 50) ? '#ffffff' : (fps < 30) ? '#f4c40e' : '#4b4f52';
       value.innerHTML       = ok;
       value.style.color     = color;
-      msg.style.borderColor = color;
     }, 5000);
     return result;
   },
