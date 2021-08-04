@@ -340,13 +340,13 @@ var KEY = {
 };
 
 var COLORS = {
-  SKY:  '#72D7EE',
-  TREE: '#005108',
-  FOG:  '#005108',
-  LIGHT:  { road: '#6B6B6B', grass: '#10AA10', rumble: '#555555', lane: '#CCCCCC'  },
-  DARK:   { road: '#696969', grass: '#009A00', rumble: '#BBBBBB'                   },
-  START:  { road: 'white',   grass: 'white',   rumble: 'white'                     },
-  FINISH: { road: 'black',   grass: 'black',   rumble: 'black'                     }
+  SKY:  '#ede096',
+  TREE: '#111113',
+  FOG:  '#262729',
+  LIGHT:  { road: '#313335', grass: '#0a7b5d', rumble: '#cdcfd1', lane: '#cdcfd1'  },
+  DARK:   { road: '#262729', grass: '#03543f', rumble: '#c42626'                   },
+  START:  { road: '#ebebeb', grass: '#ebebeb', rumble: '#ebebeb'                     },
+  FINISH: { road: '#111113', grass: '#111113', rumble: '#111113'                     }
 };
 
 var BACKGROUND = {
