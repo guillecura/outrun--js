@@ -306,14 +306,14 @@ var Render = {
       }
     else if (steer > 0)
       if (lightSpeed) {
-        sprite = (updown > 0) ? SPRITES.PLAYER_UPHILL_RIGHT : SPRITES.PLAYER_LIGHTSPEED_RIGHT;
+        sprite = (updown > 0) ? SPRITES.PLAYER_LIGHTSPEED_UPHILL_RIGHT : SPRITES.PLAYER_LIGHTSPEED_RIGHT;
       } else {
         sprite = (updown > 0) ? SPRITES.PLAYER_UPHILL_RIGHT : SPRITES.PLAYER_RIGHT;
       }
     else if (handBreaking)
-      sprite = SPRITES.PLAYER_HANDBREAKING
+      sprite = SPRITES.PLAYER_HANDBREAKING;
     else if (lightSpeed)
-      sprite = SPRITES.PLAYER_LIGHTSPEED_STRAIGHT
+      sprite = (updown > 0) ? SPRITES.PLAYER_LIGHTSPEED_UPHILL_STRAIGHT : SPRITES.PLAYER_LIGHTSPEED_STRAIGHT;
     else
       sprite = (updown > 0) ? SPRITES.PLAYER_UPHILL_STRAIGHT : SPRITES.PLAYER_STRAIGHT;
 
@@ -393,23 +393,27 @@ var SPRITES = {
   BILLBOARD02:            { x:  245, y: 1262, w:  215, h:  220 },
   STUMP:                  { x:  995, y:  330, w:  195, h:  140 },
   SEMI:                   { x: 1365, y:  490, w:  122, h:  144 },
-  TRUCK:                  { x: 1365, y:  644, w:  100, h:   78 },
-  CAR03:                  { x: 1383, y:  760, w:   88, h:   55 },
-  CAR02:                  { x: 1383, y:  825, w:   80, h:   59 },
-  CAR04:                  { x: 1383, y:  894, w:   80, h:   57 },
-  CAR01:                  { x: 1205, y: 1018, w:   80, h:   56 },
-  PLAYER_UPHILL_LEFT:     { x: 1383, y:  961, w:   80, h:   45 },
-  PLAYER_UPHILL_STRAIGHT: { x: 1295, y: 1018, w:   80, h:   45 },
-  PLAYER_UPHILL_RIGHT:    { x: 1385, y: 1018, w:   80, h:   45 },
-  PLAYER_LEFT:            { x:  995, y:  480, w:   80, h:   41 },
-  PLAYER_STRAIGHT:        { x: 1085, y:  480, w:   80, h:   41 },
-  PLAYER_RIGHT:           { x:  995, y:  531, w:   80, h:   41 },
-  PLAYER_HANDBREAKING:    { x:  995, y:  480, w:   80, h:   41 },
-  PLAYER_LIGHTSPEED_STRAIGHT:     { x: 1085, y: 633,  w:   80, h:   45 },
-  PLAYER_LIGHTSPEED_UPHILL_LEFT:  { x: 1085, y:  739, w:   80, h:   45 },
-  PLAYER_LIGHTSPEED_UPHILL_RIGHT: { x: 995, y: 739, w:   80, h:   45 },
-  PLAYER_LIGHTSPEED_RIGHT:        { x:  995, y:  688, w:   80, h:   41 },
-  PLAYER_LIGHTSPEED_LEFT:         { x:  1085, y: 688, w:   80, h:   41 }
+  
+  TRUCK:                  { x:  490, y:  755, w:  120, h:   94 },
+  
+  CAR03:                  { x:  730, y:  793, w:   90, h:   57 },
+  CAR02:                  { x:  830, y:  783, w:   90, h:   66 },
+  CAR04:                  { x:  930, y:  784, w:   90, h:   65 },
+  CAR01:                  { x:  620, y:  779, w:  100, h:   70 },
+  
+  PLAYER_UPHILL_LEFT:                 { x:  796, y:  653, w: 120, h: 88 },
+  PLAYER_UPHILL_STRAIGHT:             { x:  926, y:  653, w: 120, h: 88 },
+  PLAYER_UPHILL_RIGHT:                { x: 1056, y:  653, w: 120, h: 88 },
+  PLAYER_LEFT:                        { x:  796, y:  555, w: 120, h: 88 },
+  PLAYER_STRAIGHT:                    { x:  926, y:  555, w: 120, h: 88 },
+  PLAYER_RIGHT:                       { x: 1056, y:  555, w: 120, h: 88 },
+  PLAYER_HANDBREAKING:                { x:  796, y:  555, w: 120, h: 88 },
+  PLAYER_LIGHTSPEED_UPHILL_LEFT:      { x:  497, y: 1195, w: 120, h: 88 },
+  PLAYER_LIGHTSPEED_UPHILL_STRAIGHT:  { x:  627, y: 1195, w: 120, h: 88 },
+  PLAYER_LIGHTSPEED_UPHILL_RIGHT:     { x:  757, y: 1195, w: 120, h: 88 },
+  PLAYER_LIGHTSPEED_LEFT:             { x:  497, y: 1097, w: 120, h: 88 },
+  PLAYER_LIGHTSPEED_STRAIGHT:         { x:  627, y: 1097, w: 120, h: 88 },
+  PLAYER_LIGHTSPEED_RIGHT:            { x:  757, y: 1097, w: 120, h: 88 }
 };
 
 SPRITES.SCALE = 0.3 * (1/SPRITES.PLAYER_STRAIGHT.w) // the reference sprite width should be 1/3rd the (half-)roadWidth
