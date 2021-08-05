@@ -344,9 +344,9 @@ var COLORS = {
   TREE: '#111113',
   FOG:  '#262729',
   LIGHT:  { road: '#313335', grass: '#0a7b5d', rumble: '#cdcfd1', lane: '#cdcfd1' },
-  DARK:   { road: '#262729', grass: '#03543f', rumble: '#c42626' },
-  START:  { road: '#ebebeb', grass: '#ebebeb', rumble: '#ebebeb' },
-  FINISH: { road: '#111113', grass: '#111113', rumble: '#111113' }
+  DARK:   { road: '#262729', grass: '#03543f', rumble: '#a6aaad' },
+  START:  { road: '#a6aaad', grass: '#cdcfd1', rumble: '#757575' },
+  FINISH: { road: '#f4c40e', grass: '#fece35', rumble: '#e6b10d' }
 };
 
 var BACKGROUND = {
