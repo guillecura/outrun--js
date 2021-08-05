@@ -18,6 +18,13 @@
   --backlot-dark:  #e6b10d;
   --backlot-light: #fece35;
   
+  --green:         #0a7b5d;
+  --green-dark:    #03543f;
+  --green-light:   #16a17c;
+
+  --alert-dark:    #c42626;
+  --background:    #ede096;
+  
   --topbar:        4px;
   --bottombar:     80px;
   --hud:           24vh;
@@ -83,12 +90,13 @@ html {
   height: 100%;
   position: relative;
   width: fit-content;
+  max-width: 100%;
 }
 #content #racer {
   z-index: 0;
 }
 #content #canvas {
-  background-color: var(--black);
+  background-color: var(--background);
   object-fit: contain;
   z-index: 0;
 }
@@ -267,6 +275,10 @@ html {
   color: var(--smoke-dark);
   width: 100%;
 }
+/* Options */
+#controls {
+  display: none;
+}
 /* FPS */
 #fps-box {
   align-items: center;
@@ -297,14 +309,14 @@ html {
 #fps-box #msText {
   color: var(--grey);
   font-size: 10px;
-  margin: 4px;
+  margin: var(--border);
   text-align: center;
   width: 100%;
 }
 #fps-box #fpsGraph,
 #fps-box #msGraph {
   background-color: var(--grey-dark);
-  height: var(--icon);
+  height: var(--distance);
   margin: 0;
   position: relative;
   width: 100%;
@@ -313,8 +325,6 @@ html {
 #fps-box #msGraph > span {
   background-color: var(--black-light);
   float: left;
-  height: var(--icon);
+  height: var(--distance);
   width: 1px;
 }
-
-#lanes, #controls { display: none; }

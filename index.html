@@ -51,6 +51,20 @@
         <div id='instructions'>
           <p>Use the <b>arrow keys</b> to drive the car.</p>
         </div>
+        <!-- Options -->
+        <div id="controls">
+          <input id="lanes" type="hidden">
+          <input id="roadWidth" type='hidden'>
+          <span id="currentRoadWidth"></span>
+          <input id="cameraHeight" type='hidden'>
+          <span id="currentCameraHeight"></span>
+          <input id="drawDistance" type='hidden'>
+          <span id="currentDrawDistance"></span>
+          <input id="fieldOfView" type='hidden'>
+          <span id="currentFieldOfView"></span>
+          <input id="fogDensity" type='hidden'>
+          <span id="currentFogDensity"></span>
+        </div>
         <!-- Change Res -->
         <select id="resolution">
           <option selected value='fine'>High-Res</option>
@@ -62,40 +76,14 @@
       </footer>
     </div>
 
-    <select id="lanes">
-      <option selected>3</option>
-    </select>
-    <table id="controls">
-      <tr>
-        <th><label for="roadWidth">Road Width (<span id="currentRoadWidth"></span>) :</label></th>
-        <td><input id="roadWidth" type='range' min='500' max='3000' title="integer (500-3000)"></td>
-      </tr>
-      <tr>
-        <th><label for="cameraHeight">CameraHeight (<span id="currentCameraHeight"></span>) :</label></th>
-        <td><input id="cameraHeight" type='range' min='500' max='5000' title="integer (500-5000)"></td>
-      </tr>
-      <tr>
-        <th><label for="drawDistance">Draw Distance (<span id="currentDrawDistance"></span>) :</label></th>
-        <td><input id="drawDistance" type='range' min='100' max='500' title="integer (100-500)"></td>
-      </tr>
-      <tr>
-        <th><label for="fieldOfView">Field of View (<span id="currentFieldOfView"></span>) :</label></th>
-        <td><input id="fieldOfView" type='range' min='80' max='140' title="integer (80-140)"></td>
-      </tr>
-      <tr>
-        <th><label for="fogDensity">Fog Density (<span id="currentFogDensity"></span>) :</label></th>
-        <td><input id="fogDensity" type='range' min='0' max='50' title="integer (0-50)"></td>
-      </tr>
-    </table>
-
+    <!-- JS -->
     <script src="stats.js"></script>
-    <script src="common.js"></script>
-    
+    <script src="common.js"></script>    
     <script>
       var fps            = 60;                      // how many 'update' frames per second
       var step           = 1/fps;                   // how long is each frame (in seconds)
-      var width          = 1024;                    // logical canvas width
-      var height         = 768;                     // logical canvas height
+      var width          = 1280;                    // logical canvas width
+      var height         = 960;                     // logical canvas height
       var centrifugal    = 0.3;                     // centrifugal force multiplier when going around curves
       var offRoadDecel   = 0.99;                    // speed multiplier when off road (e.g. you lose 2% speed each update frame)
       var skySpeed       = 0.001;                   // background sky layer scroll speed when going around curve (or up hill)
@@ -114,25 +102,27 @@
       var resolution     = null;                    // scaling factor to provide resolution independence (computed)
       var roadWidth      = 2000;                    // actually half the roads width, easier math if the road spans from -roadWidth to +roadWidth
       var segmentLength  = 200;                     // length of a single segment
-      var rumbleLength   = 3;                       // number of segments per red/white rumble strip
+      var rumbleLength   = 2;                       // number of segments per red/white rumble strip
       var trackLength    = null;                    // z length of entire track (computed)
-      var lanes          = 3;                       // number of lanes
+      var lanes          = 4;                       // number of lanes
       var fieldOfView    = 100;                     // angle (degrees) for field of view
-      var cameraHeight   = 1000;                    // z height of camera
+      var cameraHeight   = 1280;                    // z height of camera
       var cameraDepth    = null;                    // z distance camera is from screen (computed)
-      var drawDistance   = 300;                     // number of segments to draw
+      var drawDistance   = 280;                     // number of segments to draw
       var playerX        = 0;                       // player x offset from center of road (-1 to 1 to stay independent of roadWidth)
       var playerZ        = null;                    // player relative z distance from camera (computed)
-      var fogDensity     = 5;                       // exponential fog density
+      var fogDensity     = 6;                       // exponential fog density
       var position       = 0;                       // current camera Z position (add playerZ to get player's absolute Z position)
       var speed          = 0;                       // current speed
-      var maxSpeed       = segmentLength/step;      // top speed (ensure we can't move more than 1 segment in a single frame to make collision detection easier)
+      var maxSpeed       = segmentLength/(step/1.5);// top speed (ensure we can't move more than 1 segment in a single frame to make collision detection easier)
       var accel          =  maxSpeed/5;             // acceleration rate - tuned until it 'felt' right
       var breaking       = -maxSpeed;               // deceleration rate when braking
       var decel          = -maxSpeed/5;             // 'natural' deceleration rate when neither accelerating, nor braking
+      var handBreak      = -(maxSpeed*2);           // BLC hand break
+      var lightSpeed     =  maxSpeed*3;             // BLC light speed
       var offRoadDecel   = -maxSpeed/2;             // off road deceleration is somewhere in between
       var offRoadLimit   =  maxSpeed/4;             // limit when off road deceleration no longer applies (e.g. you can always go at least this speed even when off road)
-      var totalCars      = 200;                     // total number of cars on the road
+      var totalCars      = 230;                     // total number of cars on the road
       var currentLapTime = 0;                       // current lap time
       var lastLapTime    = null;                    // last lap time
 
@@ -140,6 +130,8 @@
       var keyRight       = false;
       var keyFaster      = false;
       var keySlower      = false;
+      var keyHandBreak   = false;
+      var keyLightSpeed  = false;
 
       var hud = {
         speed:            { value: null, dom: Dom.get('speed_value')            },
@@ -170,13 +162,21 @@
 
         playerX = playerX - (dx * speedPercent * playerSegment.curve * centrifugal);
 
-        if (keyFaster)
-          speed = Util.accelerate(speed, accel, dt);
-        else if (keySlower)
+        if (keyFaster){
+          if (keyLightSpeed) {
+            speed = Util.accelerate(speed, lightSpeed, dt);
+          } else if (keyHandBreak) {
+            speed = Util.accelerate(speed, handBreak, dt);
+          } else {
+            speed = Util.accelerate(speed, accel, dt);
+          } 
+        } else if (keySlower) {
           speed = Util.accelerate(speed, breaking, dt);
-        else
+        }  else if (keyHandBreak) {
+          speed = Util.accelerate(speed, handBreak, dt);
+        } else {
           speed = Util.accelerate(speed, decel, dt);
-
+        }
 
         if ((playerX < -1) || (playerX > 1)) {
 
@@ -399,7 +399,9 @@
                           width/2,
                           (height/2) - (cameraDepth/playerZ * Util.interpolate(playerSegment.p1.camera.y, playerSegment.p2.camera.y, playerPercent) * height/2),
                           speed * (keyLeft ? -1 : keyRight ? 1 : 0),
-                          playerSegment.p2.world.y - playerSegment.p1.world.y);
+                          playerSegment.p2.world.y - playerSegment.p1.world.y,
+                          keyHandBreak,
+                          keyLightSpeed);
           }
         }
       }
@@ -607,10 +609,13 @@
           { keys: [KEY.RIGHT, KEY.D], mode: 'down', action: function() { keyRight  = true;  } },
           { keys: [KEY.UP,    KEY.W], mode: 'down', action: function() { keyFaster = true;  } },
           { keys: [KEY.DOWN,  KEY.S], mode: 'down', action: function() { keySlower = true;  } },
+          { keys: [KEY.SPACE], mode: 'down', action: function() { keyHandBreak = true;  } },
+          { keys: [KEY.SHIFT], mode: 'down', action: function() { keyLightSpeed = true;  } },
           { keys: [KEY.LEFT,  KEY.A], mode: 'up',   action: function() { keyLeft   = false; } },
           { keys: [KEY.RIGHT, KEY.D], mode: 'up',   action: function() { keyRight  = false; } },
           { keys: [KEY.UP,    KEY.W], mode: 'up',   action: function() { keyFaster = false; } },
-          { keys: [KEY.DOWN,  KEY.S], mode: 'up',   action: function() { keySlower = false; } }
+          { keys: [KEY.SPACE], mode: 'up',   action: function() { keyHandBreak = false; } },
+          { keys: [KEY.SHIFT], mode: 'up', action: function() { keyLightSpeed = false;  } }
         ],
         ready: function(images) {
           background = images[0];
