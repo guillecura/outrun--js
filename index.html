@@ -117,12 +117,13 @@
       var fogDensity     = 6;                       // exponential fog density
       var position       = 0;                       // current camera Z position (add playerZ to get player's absolute Z position)
       var speed          = 0;                       // current speed
-      var maxSpeed       = segmentLength/(step/1.5);// top speed (ensure we can't move more than 1 segment in a single frame to make collision detection easier)
+      var maxSpeed       = segmentLength/(step/1.25); // top speed (ensure we can't move more than 1 segment in a single frame to make collision detection easier)
       var accel          =  maxSpeed/5;             // acceleration rate - tuned until it 'felt' right
       var breaking       = -maxSpeed;               // deceleration rate when braking
       var decel          = -maxSpeed/5;             // 'natural' deceleration rate when neither accelerating, nor braking
       var handBreak      = -(maxSpeed*2);           // BLC hand break
-      var lightSpeed     =  maxSpeed*3;             // BLC light speed
+      var lightSpeed     =  maxSpeed*1.25;          // BLC light speed
+      var maxLightSpeed  =  maxSpeed*1.25;          // BLC light speed
       var offRoadDecel   = -maxSpeed/2;             // off road deceleration is somewhere in between
       var offRoadLimit   =  maxSpeed/4;             // limit when off road deceleration no longer applies (e.g. you can always go at least this speed even when off road)
       var totalCars      = 230;                     // total number of cars on the road
@@ -179,19 +180,21 @@
 
         if (keyFaster){
           if (keyLightSpeed && carNitro > 0 && !nitroReload) {
+            maxSpeed = segmentLength/(step/1.5);
+            
             speed = Util.accelerate(speed, lightSpeed, dt);
-
             --carNitro;
             updateHud('nitro', carNitro);
           } else if (keyHandBreak) {
             speed = Util.accelerate(speed, handBreak, dt);
           } else {
+            maxSpeed = segmentLength/(step/1.25);
             speed = Util.accelerate(speed, accel, dt);
 
             if (carNitro == 0) {
               nitroReload = true;
             }
-          } 
+          }
         } else if (keySlower) {
           speed = Util.accelerate(speed, breaking, dt);
         }  else if (keyHandBreak) {
@@ -199,9 +202,10 @@
         } else {
           speed = Util.accelerate(speed, decel, dt);
         }
+        
+        speed = Util.limit(speed, 0, maxSpeed);
 
         if ((playerX < -1) || (playerX > 1)) {
-
           if (speed > offRoadLimit)
             speed = Util.accelerate(speed, offRoadDecel, dt);
 
@@ -228,9 +232,7 @@
           }
         }
 
-        playerX = Util.limit(playerX, -3, 3);     // dont ever let it go too far out of bounds
-        speed   = Util.limit(speed, 0, maxSpeed); // or exceed maxSpeed
-
+        playerX    = Util.limit(playerX, -3, 3);  // dont ever let it go too far out of bounds
         skyOffset  = Util.increase(skyOffset,  skySpeed  * playerSegment.curve * (position-startPosition)/segmentLength, 1);
         hillOffset = Util.increase(hillOffset, hillSpeed * playerSegment.curve * (position-startPosition)/segmentLength, 1);
         treeOffset = Util.increase(treeOffset, treeSpeed * playerSegment.curve * (position-startPosition)/segmentLength, 1);
