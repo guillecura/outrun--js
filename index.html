@@ -26,6 +26,9 @@
             <div id="speed">
               <span id="speed_value" class="value">0</span>
             </div>
+            <div id="nitro">
+              Nitro: <span id="nitro_value" class="value">100</span>
+            </div>
             <!-- Time -->
             <div id="current_lap_time">
               <span id="current_lap_time_value" class="value">0.0</span>
@@ -125,7 +128,9 @@
       var totalCars      = 230;                     // total number of cars on the road
       var currentLapTime = 0;                       // current lap time
       var lastLapTime    = null;                    // last lap time
-
+      var maxNitro       = 100;
+      var carNitro       = 100;
+      var nitroReload    = false;
       var keyLeft        = false;
       var keyRight       = false;
       var keyFaster      = false;
@@ -136,6 +141,7 @@
       var hud = {
         speed:            { value: null, dom: Dom.get('speed_value')            },
         current_lap_time: { value: null, dom: Dom.get('current_lap_time_value') },
+        nitro:            { value: null, dom: Dom.get('nitro_value') },
         last_lap_time:    { value: null, dom: Dom.get('last_lap_time_value')    },
         fast_lap_time:    { value: null, dom: Dom.get('fast_lap_time_value')    }
       }
@@ -162,13 +168,29 @@
 
         playerX = playerX - (dx * speedPercent * playerSegment.curve * centrifugal);
 
+        if (nitroReload) {
+          if (carNitro < maxNitro) {
+            ++carNitro;
+            updateHud('nitro', carNitro);
+          } else {
+            nitroReload = false;
+          }
+        }
+
         if (keyFaster){
-          if (keyLightSpeed) {
+          if (keyLightSpeed && carNitro > 0 && !nitroReload) {
             speed = Util.accelerate(speed, lightSpeed, dt);
+
+            --carNitro;
+            updateHud('nitro', carNitro);
           } else if (keyHandBreak) {
             speed = Util.accelerate(speed, handBreak, dt);
           } else {
             speed = Util.accelerate(speed, accel, dt);
+
+            if (carNitro == 0) {
+              nitroReload = true;
+            }
           } 
         } else if (keySlower) {
           speed = Util.accelerate(speed, breaking, dt);
@@ -401,7 +423,7 @@
                           speed * (keyLeft ? -1 : keyRight ? 1 : 0),
                           playerSegment.p2.world.y - playerSegment.p1.world.y,
                           keyHandBreak,
-                          keyLightSpeed);
+                          keyLightSpeed && !nitroReload);
           }
         }
       }
@@ -578,9 +600,7 @@
             offset = side * (1.5 + Math.random());
             addSprite(n + Util.randomInt(0, 50), sprite, offset);
           }
-            
         }
-
       }
 
       function resetCars() {
@@ -639,7 +659,7 @@
         segmentLength          = Util.toInt(options.segmentLength,  segmentLength);
         rumbleLength           = Util.toInt(options.rumbleLength,   rumbleLength);
         cameraDepth            = 1 / Math.tan((fieldOfView/2) * Math.PI/180);
-        playerZ                = (cameraHeight * cameraDepth);
+        playerZ                = (cameraHeight * cameraDepth + 300);
         resolution             = height/480;
         refreshTweakUI();
 

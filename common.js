@@ -299,13 +299,21 @@ var Render = {
     var bounce = (1.5 * Math.random() * speedPercent * resolution) * Util.randomChoice([-1,1]);
     var sprite;
     if (steer < 0)
-      sprite = (updown > 0) ? SPRITES.PLAYER_UPHILL_LEFT : SPRITES.PLAYER_LEFT;
+      if (lightSpeed) {
+        sprite = (updown > 0) ? SPRITES.PLAYER_LIGHTSPEED_UPHILL_LEFT : SPRITES.PLAYER_LIGHTSPEED_LEFT;
+      } else {
+        sprite = (updown > 0) ? SPRITES.PLAYER_UPHILL_LEFT : SPRITES.PLAYER_LEFT;
+      }
     else if (steer > 0)
-      sprite = (updown > 0) ? SPRITES.PLAYER_UPHILL_RIGHT : SPRITES.PLAYER_RIGHT;
+      if (lightSpeed) {
+        sprite = (updown > 0) ? SPRITES.PLAYER_UPHILL_RIGHT : SPRITES.PLAYER_LIGHTSPEED_RIGHT;
+      } else {
+        sprite = (updown > 0) ? SPRITES.PLAYER_UPHILL_RIGHT : SPRITES.PLAYER_RIGHT;
+      }
     else if (handBreaking)
       sprite = SPRITES.PLAYER_HANDBREAKING
     else if (lightSpeed)
-      sprite = SPRITES.PLAYER_LIGHTSPEED
+      sprite = SPRITES.PLAYER_LIGHTSPEED_STRAIGHT
     else
       sprite = (updown > 0) ? SPRITES.PLAYER_UPHILL_STRAIGHT : SPRITES.PLAYER_STRAIGHT;
 
@@ -397,7 +405,11 @@ var SPRITES = {
   PLAYER_STRAIGHT:        { x: 1085, y:  480, w:   80, h:   41 },
   PLAYER_RIGHT:           { x:  995, y:  531, w:   80, h:   41 },
   PLAYER_HANDBREAKING:    { x:  995, y:  480, w:   80, h:   41 },
-  PLAYER_LIGHTSPEED:      { x: 1085, y: 582,  w:   80, h:   45 }
+  PLAYER_LIGHTSPEED_STRAIGHT:     { x: 1085, y: 633,  w:   80, h:   45 },
+  PLAYER_LIGHTSPEED_UPHILL_LEFT:  { x: 1085, y:  739, w:   80, h:   45 },
+  PLAYER_LIGHTSPEED_UPHILL_RIGHT: { x: 995, y: 739, w:   80, h:   45 },
+  PLAYER_LIGHTSPEED_RIGHT:        { x:  995, y:  688, w:   80, h:   41 },
+  PLAYER_LIGHTSPEED_LEFT:         { x:  1085, y: 688, w:   80, h:   41 }
 };
 
 SPRITES.SCALE = 0.3 * (1/SPRITES.PLAYER_STRAIGHT.w) // the reference sprite width should be 1/3rd the (half-)roadWidth
