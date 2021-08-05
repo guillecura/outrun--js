@@ -4,7 +4,8 @@
   <head>
     <title>Outrun JS</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <link href="style.css" rel="stylesheet" type="text/css" />
+    <link href="./styles/style.css" rel="stylesheet" type="text/css" />
+    <link href="./styles/leaderboard.css" rel="stylesheet" type="text/css" />
   </head> 
 
   <body> 
@@ -49,6 +50,17 @@
           </div>
           <!-- Game -->
           <canvas id="canvas">Sorry, there was an error loading the canvas.</canvas>
+        </div>
+        <div class="leaderboard">
+          <h1>
+            <svg class="ico-cup">
+              <use xlink:href="#cup"></use>
+            </svg>
+            Leaderboard
+          </h1>
+          <ol id="leaderboard-list">
+            <!-- Ranking -->
+          </ol>
         </div>
       </main>
       
@@ -136,6 +148,9 @@
       var maxNitro       = 100;
       var carNitro       = 0;
       var nitroReload    = false;
+      var leaderboard    = [];
+      var urlParams      = new URLSearchParams(window.location.search);
+      var username       = urlParams.get('username'); 
       var keyLeft        = false;
       var keyRight       = false;
       var keyFaster      = false;
@@ -271,6 +286,8 @@
               Dom.removeClassName('fast_lap_time', 'fastest');
               Dom.removeClassName('last_lap_time', 'fastest');
             }
+
+            createOrUpdate(lastLapTime);
             updateHud('last_lap_time', formatTime(lastLapTime));
             Dom.show('last_lap_time');
           }
@@ -364,6 +381,86 @@
         else
           return seconds + "." + tenths;
       }
+
+      //=========================================================================
+      // RENDER THE LEADERBOARD
+      //=========================================================================
+
+      function getRanking() {
+        const myHeaders = new Headers();
+        myHeaders.append("X-User-Email", urlParams.get('email'));
+        myHeaders.append("X-User-Token", urlParams.get('token'));
+        myHeaders.append("Accept", "application/json; application/vnd.backlotcars.v3");
+
+        const requestOptions = {
+          method: 'GET',
+          headers: myHeaders
+        };
+
+        fetch(`${urlParams.get('api_url')}/api/rankings`, requestOptions)
+          .then(response => response.json())
+          .then(result => {
+            leaderboard = result.data;
+            reloadLeaderboard();
+          })
+          .catch(error => {throw error;});
+      }
+
+      function createOrUpdate(lastLapTime) {
+        const myHeaders = new Headers();
+        myHeaders.append("X-User-Email", urlParams.get('email'));
+        myHeaders.append("X-User-Token", urlParams.get('token'));
+        myHeaders.append("Accept", "application/json; application/vnd.backlotcars.v3");
+
+        const requestOptions = {
+          method: 'POST',
+          headers: myHeaders
+        };
+
+        fetch(`${urlParams.get('api_url')}/api/rankings/create_or_update?lap_time=${lastLapTime}`, requestOptions)
+          .then(result => getRanking())
+          .catch(error => {throw error;});
+      }
+
+      function putToLeaderboard(name, time) {
+        var ol = Dom.get('leaderboard-list');
+        var li = document.createElement("li");
+        li.innerHTML += 
+            `<mark>${name || 'Anonymous'}</mark><small>${time}</small>`;
+        ol.appendChild(li);
+      }
+
+      function reloadLeaderboard() {
+        var ol = Dom.get('leaderboard-list');
+        ol.innerHTML = '';
+        leaderboard.sort((a,b) => (a.time > b.time) ? 1 : ((b.time > a.time) ? -1 : 0));
+        leaderboard = leaderboard.slice(0,5);
+        leaderboard.forEach((player) => {
+          putToLeaderboard(player.name, formatTime(player.time));
+        });
+      }
+
+      function updateLeaderboard(lastLapTime) {
+        let exist = false;
+        let newLeaderboard = leaderboard;
+        newLeaderboard = newLeaderboard.map((item) => {
+          if(item.name === username && item.time > lastLapTime) {
+            exist = true;
+            return { name: item.name, time: lastLapTime};
+          }
+          return item;
+        })
+
+        if(!exist) {
+          newLeaderboard.push({name: username , time: lastLapTime})
+        }
+
+        leaderboard = newLeaderboard;
+
+        reloadLeaderboard();
+      }
+      
+      getRanking();
 
       //=========================================================================
       // RENDER THE GAME WORLD
