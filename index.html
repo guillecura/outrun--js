@@ -118,9 +118,11 @@
       var accel          =  maxSpeed/5;             // acceleration rate - tuned until it 'felt' right
       var breaking       = -maxSpeed;               // deceleration rate when braking
       var decel          = -maxSpeed/5;             // 'natural' deceleration rate when neither accelerating, nor braking
+      var handBreak      = -(maxSpeed*2);           // BLC hand break
+      var lightSpeed     =  maxSpeed*3;             // BLC light speed
       var offRoadDecel   = -maxSpeed/2;             // off road deceleration is somewhere in between
       var offRoadLimit   =  maxSpeed/4;             // limit when off road deceleration no longer applies (e.g. you can always go at least this speed even when off road)
-      var totalCars      = 280;                     // total number of cars on the road
+      var totalCars      = 280;                       // total number of cars on the road
       var currentLapTime = 0;                       // current lap time
       var lastLapTime    = null;                    // last lap time
 
@@ -128,6 +130,8 @@
       var keyRight       = false;
       var keyFaster      = false;
       var keySlower      = false;
+      var keyHandBreak   = false;
+      var keyLightSpeed  = false;
 
       var hud = {
         speed:            { value: null, dom: Dom.get('speed_value')            },
@@ -158,13 +162,21 @@
 
         playerX = playerX - (dx * speedPercent * playerSegment.curve * centrifugal);
 
-        if (keyFaster)
-          speed = Util.accelerate(speed, accel, dt);
-        else if (keySlower)
+        if (keyFaster){
+          if (keyLightSpeed) {
+            speed = Util.accelerate(speed, lightSpeed, dt);
+          } else if (keyHandBreak) {
+            speed = Util.accelerate(speed, handBreak, dt);
+          } else {
+            speed = Util.accelerate(speed, accel, dt);
+          } 
+        } else if (keySlower) {
           speed = Util.accelerate(speed, breaking, dt);
-        else
+        }  else if (keyHandBreak) {
+          speed = Util.accelerate(speed, handBreak, dt);
+        } else {
           speed = Util.accelerate(speed, decel, dt);
-
+        }
 
         if ((playerX < -1) || (playerX > 1)) {
 
@@ -595,10 +607,13 @@
           { keys: [KEY.RIGHT, KEY.D], mode: 'down', action: function() { keyRight  = true;  } },
           { keys: [KEY.UP,    KEY.W], mode: 'down', action: function() { keyFaster = true;  } },
           { keys: [KEY.DOWN,  KEY.S], mode: 'down', action: function() { keySlower = true;  } },
+          { keys: [KEY.SPACE], mode: 'down', action: function() { keyHandBreak = true;  } },
+          { keys: [KEY.SHIFT], mode: 'down', action: function() { keyLightSpeed = true;  } },
           { keys: [KEY.LEFT,  KEY.A], mode: 'up',   action: function() { keyLeft   = false; } },
           { keys: [KEY.RIGHT, KEY.D], mode: 'up',   action: function() { keyRight  = false; } },
           { keys: [KEY.UP,    KEY.W], mode: 'up',   action: function() { keyFaster = false; } },
-          { keys: [KEY.DOWN,  KEY.S], mode: 'up',   action: function() { keySlower = false; } }
+          { keys: [KEY.SPACE], mode: 'up',   action: function() { keyHandBreak = false; } },
+          { keys: [KEY.SHIFT], mode: 'up', action: function() { keyLightSpeed = false;  } }
         ],
         ready: function(images) {
           background = images[0];
