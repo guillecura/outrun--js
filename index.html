@@ -144,6 +144,7 @@
       var keyLightSpeed  = false;
       var lightSpeedMode = false;
       var fillingNitroCounter = 0;
+      var usingNitroCounter = 0;
       var routeProgress = 0;
 
       var hud = {
@@ -181,23 +182,6 @@
         
         playerX = playerX - (dx * speedPercent * playerSegment.curve * centrifugal);
 
-        var nitro = document.getElementById('nitro_slider');
-        nitro.style.cssText += 'width:' + carNitro + '%;';
-        
-        if (carNitro <= maxNitro * 0.25) {
-          nitro.classList.add('alert');
-          nitro.classList.remove('warning');
-        } else if (carNitro > maxNitro * 0.25 && carNitro <= maxNitro * 0.75) {
-          nitro.classList.add('warning');
-          nitro.classList.remove('alert');
-        } else {
-          nitro.classList.remove('alert');
-          nitro.classList.remove('warning');
-        }
-        
-        var speedometer = document.getElementById('speed_slider');
-        speedometer.style.cssText += 'transform: rotate(' + parseInt(3 + (speed * 84 / maxSpeed)) + 'deg);';
-
         if (keyFaster){
           if (lightSpeedMode) {
             useNitro();
@@ -218,6 +202,8 @@
         }
         
         speed = Util.limit(speed, 0, maxSpeed);
+
+        updateSpeedometer();
 
         if ((playerX < -1) || (playerX > 1)) {
           if (speed > offRoadLimit)
@@ -285,7 +271,7 @@
             nitroReload = true;
         }
 
-        if (routeProgress >= 350 && fillingNitroCounter >= 10) {
+        if (!keyLightSpeed && routeProgress >= 350 && fillingNitroCounter >= 10) {
           updateHud('nitro', ++carNitro);
           if (carNitro > minNitro) {
             nitroReload = false;
@@ -297,9 +283,32 @@
       }
 
       function useNitro() {
-        updateHud('nitro', --carNitro);
-        if (carNitro == 0)
-          nitroReload = true;
+        if (keyFaster && ++usingNitroCounter >= 3) {
+          updateHud('nitro', --carNitro);
+          if (carNitro == 0)
+            nitroReload = true;
+
+          usingNitroCounter = 0;
+        }
+      }
+
+      function updateSpeedometer() {
+        var nitro = document.getElementById('nitro_slider');
+        nitro.style.cssText += 'width:' + carNitro + '%;';
+        
+        if (carNitro <= maxNitro * 0.25) {
+          nitro.classList.add('alert');
+          nitro.classList.remove('warning');
+        } else if (carNitro > maxNitro * 0.25 && carNitro <= maxNitro * 0.75) {
+          nitro.classList.add('warning');
+          nitro.classList.remove('alert');
+        } else {
+          nitro.classList.remove('alert');
+          nitro.classList.remove('warning');
+        }
+        
+        var speedometer = document.getElementById('speed_slider');
+        speedometer.style.cssText += 'transform: rotate(' + parseInt(3 + (speed * 84 / maxSpeed)) + 'deg);';
       }
 
       function updateCars(dt, playerSegment, playerW) {
