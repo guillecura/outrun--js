@@ -121,7 +121,7 @@
       var fogDensity     = 6;                       // exponential fog density
       var position       = 0;                       // current camera Z position (add playerZ to get player's absolute Z position)
       var speed          = 0;                       // current speed
-      var maxSpeed       = segmentLength/(step/1.25);// top speed (ensure we can't move more than 1 segment in a single frame to make collision detection easier)
+      var maxSpeed       = segmentLength/step;      // top speed (ensure we can't move more than 1 segment in a single frame to make collision detection easier)
       var maxLightSpeed  = maxSpeed*1.25
       var accel          =  maxSpeed/5;             // acceleration rate - tuned until it 'felt' right
       var breaking       = -maxSpeed;               // deceleration rate when braking
@@ -145,6 +145,7 @@
       var keyLightSpeed  = false;
       var lightSpeedMode = false;
       var fillingNitroCounter = 0;
+      var routeProgress = 0;
 
       var hud = {
         speed:            { value: null, dom: Dom.get('speed_value')            },
@@ -162,7 +163,8 @@
         var playerSegment = findSegment(position+playerZ);
         var playerW       = SPRITES.PLAYER_STRAIGHT.w * SPRITES.SCALE;
         lightSpeedMode    = keyLightSpeed && carNitro > 0 && !nitroReload
-        var speedPercent  = speed/(lightSpeedMode ? maxLightSpeed : maxSpeed);
+        maxSpeed          = lightSpeedMode ? segmentLength/(step/1.75) : segmentLength/(step/1.25);
+        var speedPercent  = speed/maxSpeed;
         var dx            = dt * 2 * speedPercent; // at top speed, should be able to cross from left to right (-1 to 1) in 1 second
         var startPosition = position;
 
@@ -172,8 +174,6 @@
         updateCars(dt, playerSegment, playerW);
 
         position = Util.increase(position, dt * speed, trackLength);
-        
-        maxSpeed = keyLightSpeed && carNitro ? segmentLength/(step/1.75) : segmentLength/(step/1.25);
 
         if (keyLeft)
           playerX = playerX - dx;
@@ -181,8 +181,6 @@
           playerX = playerX + dx;
         
         playerX = playerX - (dx * speedPercent * playerSegment.curve * centrifugal);
-
-
 
         var nitro = document.getElementById('nitro_slider');
         nitro.style.cssText += 'width:' + carNitro + '%;';
@@ -200,8 +198,6 @@
         
         var speedometer = document.getElementById('speed_slider');
         speedometer.style.cssText += 'transform: rotate(' + parseInt(3 + (speed * 84 / maxSpeed)) + 'deg);';
-
-
 
         if (keyFaster){
           if (lightSpeedMode) {
@@ -228,14 +224,14 @@
             sprite  = playerSegment.sprites[n];
             spriteW = sprite.source.w * SPRITES.SCALE;
             if (Util.overlap(playerX, playerW, sprite.offset + spriteW/2 * (sprite.offset > 0 ? 1 : -1), spriteW)) {
-              speed = (lightSpeedMode ? maxLightSpeed : maxSpeed)/5;
+              speed = maxSpeed/5;
               position = Util.increase(playerSegment.p1.world.z, -playerZ, trackLength); // stop in front of sprite (at front of segment)
               break;
             }
           }
         }
 
-        speed   = Util.limit(speed, 0, (lightSpeedMode ? maxLightSpeed : maxSpeed)); // or exceed maxSpeed
+        speed   = Util.limit(speed, 0, maxSpeed); // or exceed maxSpeed
 
         for(n = 0 ; n < playerSegment.cars.length ; n++) {
           car  = playerSegment.cars[n];
@@ -284,18 +280,20 @@
       //-------------------------------------------------------------------------
 
       function fillNitro() {
-        if (last_lap_time < 20) {
-          nitroReload = true;
-        } else {
-          if (fillingNitroCounter == 10) {
-            updateHud('nitro', ++carNitro);
-            if (carNitro > minNitro)
-              nitroReload = false;
-
-            fillingNitroCounter = 0;
-          }
-          fillingNitroCounter++;
+        if (routeProgress < 351) {
+          if (++routeProgress == 350)
+            nitroReload = true;
         }
+
+        if (routeProgress >= 350 && fillingNitroCounter >= 10) {
+          updateHud('nitro', ++carNitro);
+          if (carNitro > minNitro) {
+            nitroReload = false;
+          }
+
+          fillingNitroCounter = 0;
+        }
+        fillingNitroCounter++;
       }
 
       function useNitro() {
