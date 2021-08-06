@@ -127,14 +127,14 @@
       var decel          = -maxSpeed/5;             // 'natural' deceleration rate when neither accelerating, nor braking
       var handBreak      = -(maxSpeed*2);           // BLC hand break
       var lightSpeed     =  maxSpeed*1.25;          // BLC light speed
-      var maxLightSpeed  =  maxSpeed*1.25;          // BLC light speed
       var offRoadDecel   = -maxSpeed/2;             // off road deceleration is somewhere in between
       var offRoadLimit   =  maxSpeed/4;             // limit when off road deceleration no longer applies (e.g. you can always go at least this speed even when off road)
-      var totalCars      = 230;                     // total number of cars on the road
+      var totalCars      = 200;                     // total number of cars on the road
       var currentLapTime = 0;                       // current lap time
       var lastLapTime    = null;                    // last lap time
-      var maxNitro       = 100;
       var carNitro       = 0;
+      var maxNitro       = 100;
+      var minNitro       = maxNitro * 0.2;
       var nitroReload    = false;
       var keyLeft        = false;
       var keyRight       = false;
@@ -142,11 +142,14 @@
       var keySlower      = false;
       var keyHandBreak   = false;
       var keyLightSpeed  = false;
+      var lightSpeedMode = false;
+      var fillingNitroCounter = 0;
+      var routeProgress = 0;
 
       var hud = {
         speed:            { value: null, dom: Dom.get('speed_value')            },
+        nitro:            { value: null, dom: Dom.get('nitro_value')            },
         current_lap_time: { value: null, dom: Dom.get('current_lap_time_value') },
-        nitro:            { value: null, dom: Dom.get('nitro_value') },
         last_lap_time:    { value: null, dom: Dom.get('last_lap_time_value')    },
         fast_lap_time:    { value: null, dom: Dom.get('fast_lap_time_value')    }
       }
@@ -158,15 +161,18 @@
         var n, car, carW, sprite, spriteW;
         var playerSegment = findSegment(position+playerZ);
         var playerW       = SPRITES.PLAYER_STRAIGHT.w * SPRITES.SCALE;
+        lightSpeedMode    = keyLightSpeed && carNitro > 0 && !nitroReload
+        maxSpeed          = lightSpeedMode ? segmentLength/(step/1.75) : segmentLength/(step/1.25);
         var speedPercent  = speed/maxSpeed;
         var dx            = dt * 2 * speedPercent; // at top speed, should be able to cross from left to right (-1 to 1) in 1 second
         var startPosition = position;
 
+        if (carNitro < maxNitro)
+          fillNitro();
+
         updateCars(dt, playerSegment, playerW);
 
         position = Util.increase(position, dt * speed, trackLength);
-        
-        maxSpeed = keyLightSpeed && carNitro ? segmentLength/(step/1.75) : segmentLength/(step/1.25);
 
         if (keyLeft)
           playerX = playerX - dx;
@@ -175,16 +181,6 @@
         
         playerX = playerX - (dx * speedPercent * playerSegment.curve * centrifugal);
 
-        if (nitroReload) {
-          if (carNitro < maxNitro && speed >= segmentLength/(step/1.25) - 5 && speed <= segmentLength/(step/1.25) + 5) {
-            carNitro = carNitro + parseInt(speed / 15000);
-            updateHud('nitro', carNitro);
-          }
-           else {
-            nitroReload = false;
-          }
-        }
-        
         var nitro = document.getElementById('nitro_slider');
         nitro.style.cssText += 'width:' + carNitro + '%;';
         
@@ -203,17 +199,15 @@
         speedometer.style.cssText += 'transform: rotate(' + parseInt(3 + (speed * 84 / maxSpeed)) + 'deg);';
 
         if (keyFaster){
-          if (keyLightSpeed && carNitro > 0 && !nitroReload) {
-            speed = Util.accelerate(speed, lightSpeed, dt);
-            --carNitro;
-            updateHud('nitro', carNitro);
+          if (lightSpeedMode) {
+            useNitro();
+            speed = Util.accelerate(speed, (carNitro == 0 ? accel : lightSpeed), dt);
           } else if (carNitro == 0 && speed >= segmentLength/(step/1.25)) {
             speed = Util.accelerate(speed, breaking, dt);
           } else if (keyHandBreak) {
             speed = Util.accelerate(speed, handBreak, dt);
           } else {
             speed = Util.accelerate(speed, accel, dt);
-            if (carNitro == 0) nitroReload = true;
           }
         } else if (keySlower) {
           speed = Util.accelerate(speed, breaking, dt);
@@ -252,7 +246,7 @@
           }
         }
 
-        playerX    = Util.limit(playerX, -3, 3);  // dont ever let it go too far out of bounds
+        playerX = Util.limit(playerX, -3, 3); // dont ever let it go too far out of bounds
         skyOffset  = Util.increase(skyOffset,  skySpeed  * playerSegment.curve * (position-startPosition)/segmentLength, 1);
         hillOffset = Util.increase(hillOffset, hillSpeed * playerSegment.curve * (position-startPosition)/segmentLength, 1);
         treeOffset = Util.increase(treeOffset, treeSpeed * playerSegment.curve * (position-startPosition)/segmentLength, 1);
@@ -284,6 +278,29 @@
       }
 
       //-------------------------------------------------------------------------
+
+      function fillNitro() {
+        if (routeProgress < 351) {
+          if (++routeProgress == 350)
+            nitroReload = true;
+        }
+
+        if (routeProgress >= 350 && fillingNitroCounter >= 10) {
+          updateHud('nitro', ++carNitro);
+          if (carNitro > minNitro) {
+            nitroReload = false;
+          }
+
+          fillingNitroCounter = 0;
+        }
+        fillingNitroCounter++;
+      }
+
+      function useNitro() {
+        updateHud('nitro', --carNitro);
+        if (carNitro == 0)
+          nitroReload = true;
+      }
 
       function updateCars(dt, playerSegment, playerW) {
         var n, car, oldSegment, newSegment;
@@ -445,7 +462,7 @@
                           speed * (keyLeft ? -1 : keyRight ? 1 : 0),
                           playerSegment.p2.world.y - playerSegment.p1.world.y,
                           keyHandBreak,
-                          keyLightSpeed && !nitroReload);
+                          lightSpeedMode);
           }
         }
       }
