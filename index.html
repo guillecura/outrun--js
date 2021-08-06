@@ -27,7 +27,10 @@
               <span id="speed_value" class="value">0</span>
             </div>
             <div id="nitro">
-              Nitro: <span id="nitro_value" class="value">100</span>
+              <span id="nitro_value" class="value">0</span>
+              <figure id="nitro_slider_container">
+                <i id="nitro_slider" style="width: 0%;"></i>
+              </figure>
             </div>
             <!-- Time -->
             <div id="current_lap_time">
@@ -117,7 +120,7 @@
       var fogDensity     = 6;                       // exponential fog density
       var position       = 0;                       // current camera Z position (add playerZ to get player's absolute Z position)
       var speed          = 0;                       // current speed
-      var maxSpeed       = segmentLength/(step/1.25); // top speed (ensure we can't move more than 1 segment in a single frame to make collision detection easier)
+      var maxSpeed       = segmentLength/step;      // top speed (ensure we can't move more than 1 segment in a single frame to make collision detection easier)
       var accel          =  maxSpeed/5;             // acceleration rate - tuned until it 'felt' right
       var breaking       = -maxSpeed;               // deceleration rate when braking
       var decel          = -maxSpeed/5;             // 'natural' deceleration rate when neither accelerating, nor braking
@@ -130,7 +133,7 @@
       var currentLapTime = 0;                       // current lap time
       var lastLapTime    = null;                    // last lap time
       var maxNitro       = 100;
-      var carNitro       = 100;
+      var carNitro       = 0;
       var nitroReload    = false;
       var keyLeft        = false;
       var keyRight       = false;
@@ -161,39 +164,52 @@
         updateCars(dt, playerSegment, playerW);
 
         position = Util.increase(position, dt * speed, trackLength);
+        
+        maxSpeed = keyLightSpeed && carNitro ? segmentLength/(step/1.75) : segmentLength/(step/1.25);
 
         if (keyLeft)
           playerX = playerX - dx;
         else if (keyRight)
           playerX = playerX + dx;
-
+        
         playerX = playerX - (dx * speedPercent * playerSegment.curve * centrifugal);
 
         if (nitroReload) {
-          if (carNitro < maxNitro) {
-            ++carNitro;
+          if (carNitro < maxNitro && speed >= segmentLength/(step/1.25) - 5 && speed <= segmentLength/(step/1.25) + 5) {
+            carNitro = carNitro + parseInt(speed / 15000);
             updateHud('nitro', carNitro);
-          } else {
+          }
+           else {
             nitroReload = false;
           }
+        }
+        
+        var nitro = document.getElementById('nitro_slider');
+        nitro.style.cssText += 'width:' + carNitro + '%;';
+        
+        if (carNitro <= maxNitro * 0.25) {
+          nitro.classList.add('alert');
+          nitro.classList.remove('warning');
+        } else if (carNitro > maxNitro * 0.25 && carNitro <= maxNitro * 0.75) {
+          nitro.classList.add('warning');
+          nitro.classList.remove('alert');
+        } else {
+          nitro.classList.remove('alert');
+          nitro.classList.remove('warning');
         }
 
         if (keyFaster){
           if (keyLightSpeed && carNitro > 0 && !nitroReload) {
-            maxSpeed = segmentLength/(step/1.5);
-            
             speed = Util.accelerate(speed, lightSpeed, dt);
             --carNitro;
             updateHud('nitro', carNitro);
+          } else if (carNitro == 0 && speed >= segmentLength/(step/1.25)) {
+            speed = Util.accelerate(speed, breaking, dt);
           } else if (keyHandBreak) {
             speed = Util.accelerate(speed, handBreak, dt);
           } else {
-            maxSpeed = segmentLength/(step/1.25);
             speed = Util.accelerate(speed, accel, dt);
-
-            if (carNitro == 0) {
-              nitroReload = true;
-            }
+            if (carNitro == 0) nitroReload = true;
           }
         } else if (keySlower) {
           speed = Util.accelerate(speed, breaking, dt);
