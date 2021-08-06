@@ -361,7 +361,7 @@ html {
 #mute {
   appearance: none;
   background-position: 0 0;
-  background: url('images/mute.png');
+  background: url('../images/mute.png');
   border: none;
   cursor: pointer;
   display: block;
