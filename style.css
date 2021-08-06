@@ -243,10 +243,11 @@ html {
 #hud #speed::after {
   border-left: var(--border) dashed var(--white);
   border-radius: 100%;
-  border-top: var(--border) dashed var(--backlot);
+  border-top: var(--border) dashed var(--alert-dark);
   content: '';
   height: calc(200% - var(--distance) * 2);
   left: var(--distance);
+  opacity: 0.25;
   position: absolute;
   top: var(--distance);
   width: calc(200% - var(--distance) * 2);
@@ -269,6 +270,28 @@ html {
   font-size: 1vh;
   position: absolute;
   right: var(--distance);
+}
+#hud #speed #speed_slider {
+  bottom: 0;
+  display: block;
+  height: 0;
+  position: absolute;
+  right: 0;
+  transform-origin: bottom right;
+  width: var(--hud);
+  z-index: -1;
+}
+#hud #speed #speed_slider::before{
+  border-bottom: 8px solid transparent;
+  border-left: var(--distance) solid transparent;
+  border-right: var(--hud) solid var(--alert);
+  border-top: 8px solid transparent;
+  bottom: -8px;
+  content: '';
+  display: block;
+  right: 0;
+  position: absolute;
+  width: 0;
 }
 /* Lap Time */
 #hud #current_lap_time {

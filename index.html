@@ -25,11 +25,12 @@
             <!-- Speed -->
             <div id="speed">
               <span id="speed_value" class="value">0</span>
+              <i id="speed_slider"></i>
             </div>
             <div id="nitro">
               <span id="nitro_value" class="value">0</span>
               <figure id="nitro_slider_container">
-                <i id="nitro_slider" style="width: 0%;"></i>
+                <i id="nitro_slider"></i>
               </figure>
             </div>
             <!-- Time -->
@@ -197,6 +198,9 @@
           nitro.classList.remove('alert');
           nitro.classList.remove('warning');
         }
+        
+        var speedometer = document.getElementById('speed_slider');
+        speedometer.style.cssText += 'transform: rotate(' + parseInt(3 + (speed * 84 / maxSpeed)) + 'deg);';
 
         if (keyFaster){
           if (keyLightSpeed && carNitro > 0 && !nitroReload) {
