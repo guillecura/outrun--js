@@ -31,7 +31,7 @@
   --background:    #ede096;
   
   --topbar:        4px;
-  --bottombar:     80px;
+  --bottombar:     64px;
   --hud:           24vh;
   --hud-smaller:   12vh;
   --hud-larger:    48vh;
@@ -45,7 +45,7 @@
 /***************************************************************/
 @font-face {
     font-family: 'PressStart2P';
-    src: url('fonts/PressStart2P.ttf');
+    src: url('../fonts/PressStart2P.ttf');
 }
 
 * {
@@ -58,6 +58,7 @@ body,
 html {
   background-color: var(--black-light);
   font-family: Arial, Helvetica, sans-serif;
+  min-height: calc(var(--bottombar) * 6);
   overflow: hidden;
 }
 
@@ -86,6 +87,7 @@ html {
 }
 /* Content */
 #content {
+  background-color: var(--black-light);
   height: calc(100vh - var(--bottombar) - var(--topbar));
   width: 100%;
   z-index: 0;
@@ -93,9 +95,9 @@ html {
 #content #racer,
 #content #canvas {
   height: 100%;
-  position: relative;
-  width: fit-content;
   max-width: 100%;
+  position: relative;
+  width: calc((100vh - var(--bottombar) - var(--topbar)) * 4/3);
 }
 #content #racer {
   z-index: 0;
@@ -359,7 +361,7 @@ html {
 #mute {
   appearance: none;
   background-position: 0 0;
-  background: url('images/mute.png');
+  background: url('../images/mute.png');
   border: none;
   cursor: pointer;
   display: block;
@@ -384,8 +386,14 @@ html {
 }
 /* Instructions */
 #instructions {
+  align-items: center;
   color: var(--smoke-dark);
+  display: flex;
+  justify-content: flex-start;
   width: 100%;
+}
+#instructions p {
+  margin: 0 var(--distance);
 }
 /* Options */
 #controls {
@@ -422,21 +430,10 @@ html {
   color: var(--grey);
   font-size: 10px;
   margin: var(--border);
-  text-align: center;
+  text-align: right;
   width: 100%;
 }
 #fps-box #fpsGraph,
 #fps-box #msGraph {
-  background-color: var(--grey-dark);
-  height: var(--distance);
-  margin: 0;
-  position: relative;
-  width: 100%;
-}
-#fps-box #fpsGraph > span,
-#fps-box #msGraph > span {
-  background-color: var(--black-light);
-  float: left;
-  height: var(--distance);
-  width: 1px;
+  display: none;
 }
