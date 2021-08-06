@@ -121,13 +121,13 @@
       var fogDensity     = 6;                       // exponential fog density
       var position       = 0;                       // current camera Z position (add playerZ to get player's absolute Z position)
       var speed          = 0;                       // current speed
-      var maxSpeed       = segmentLength/(step/1.5);// top speed (ensure we can't move more than 1 segment in a single frame to make collision detection easier)
-      var maxLightSpeed  = maxSpeed*1.4
+      var maxSpeed       = segmentLength/(step/1.25);// top speed (ensure we can't move more than 1 segment in a single frame to make collision detection easier)
+      var maxLightSpeed  = maxSpeed*1.25
       var accel          =  maxSpeed/5;             // acceleration rate - tuned until it 'felt' right
       var breaking       = -maxSpeed;               // deceleration rate when braking
       var decel          = -maxSpeed/5;             // 'natural' deceleration rate when neither accelerating, nor braking
       var handBreak      = -(maxSpeed*2);           // BLC hand break
-      var lightSpeed     =  maxSpeed/0.3;           // BLC light speed
+      var lightSpeed     =  maxSpeed*1.25;           // BLC light speed
       var offRoadDecel   = -maxSpeed/2;             // off road deceleration is somewhere in between
       var offRoadLimit   =  maxSpeed/4;             // limit when off road deceleration no longer applies (e.g. you can always go at least this speed even when off road)
       var totalCars      = 100;                     // total number of cars on the road
@@ -219,8 +219,6 @@
         } else {
           speed = Util.accelerate(speed, decel, dt);
         }
-        
-        speed = Util.limit(speed, 0, maxSpeed);
 
         if ((playerX < -1) || (playerX > 1)) {
           if (speed > offRoadLimit)
@@ -237,6 +235,8 @@
           }
         }
 
+        speed   = Util.limit(speed, 0, (lightSpeedMode ? maxLightSpeed : maxSpeed)); // or exceed maxSpeed
+
         for(n = 0 ; n < playerSegment.cars.length ; n++) {
           car  = playerSegment.cars[n];
           carW = car.sprite.w * SPRITES.SCALE;
@@ -250,7 +250,6 @@
         }
 
         playerX = Util.limit(playerX, -3, 3);     // dont ever let it go too far out of bounds
-        speed   = Util.limit(speed, 0, (lightSpeedMode ? maxLightSpeed : maxSpeed)); // or exceed maxSpeed
 
         skyOffset  = Util.increase(skyOffset,  skySpeed  * playerSegment.curve * (position-startPosition)/segmentLength, 1);
         hillOffset = Util.increase(hillOffset, hillSpeed * playerSegment.curve * (position-startPosition)/segmentLength, 1);
