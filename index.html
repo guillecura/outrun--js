@@ -121,20 +121,21 @@
       var fogDensity     = 6;                       // exponential fog density
       var position       = 0;                       // current camera Z position (add playerZ to get player's absolute Z position)
       var speed          = 0;                       // current speed
-      var maxSpeed       = segmentLength/step;      // top speed (ensure we can't move more than 1 segment in a single frame to make collision detection easier)
+      var maxSpeed       = segmentLength/(step/1.5);// top speed (ensure we can't move more than 1 segment in a single frame to make collision detection easier)
+      var maxLightSpeed  = maxSpeed*1.4
       var accel          =  maxSpeed/5;             // acceleration rate - tuned until it 'felt' right
       var breaking       = -maxSpeed;               // deceleration rate when braking
       var decel          = -maxSpeed/5;             // 'natural' deceleration rate when neither accelerating, nor braking
       var handBreak      = -(maxSpeed*2);           // BLC hand break
-      var lightSpeed     =  maxSpeed*1.25;          // BLC light speed
-      var maxLightSpeed  =  maxSpeed*1.25;          // BLC light speed
+      var lightSpeed     =  maxSpeed/0.3;           // BLC light speed
       var offRoadDecel   = -maxSpeed/2;             // off road deceleration is somewhere in between
       var offRoadLimit   =  maxSpeed/4;             // limit when off road deceleration no longer applies (e.g. you can always go at least this speed even when off road)
-      var totalCars      = 230;                     // total number of cars on the road
+      var totalCars      = 100;                     // total number of cars on the road
       var currentLapTime = 0;                       // current lap time
       var lastLapTime    = null;                    // last lap time
-      var maxNitro       = 100;
       var carNitro       = 0;
+      var maxNitro       = 100;
+      var minNitro       = maxNitro * 0.2;
       var nitroReload    = false;
       var keyLeft        = false;
       var keyRight       = false;
@@ -142,11 +143,13 @@
       var keySlower      = false;
       var keyHandBreak   = false;
       var keyLightSpeed  = false;
+      var lightSpeedMode = false;
+      var fillingNitroCounter = 0;
 
       var hud = {
         speed:            { value: null, dom: Dom.get('speed_value')            },
+        nitro:            { value: null, dom: Dom.get('nitro_value')            },
         current_lap_time: { value: null, dom: Dom.get('current_lap_time_value') },
-        nitro:            { value: null, dom: Dom.get('nitro_value') },
         last_lap_time:    { value: null, dom: Dom.get('last_lap_time_value')    },
         fast_lap_time:    { value: null, dom: Dom.get('fast_lap_time_value')    }
       }
@@ -158,9 +161,13 @@
         var n, car, carW, sprite, spriteW;
         var playerSegment = findSegment(position+playerZ);
         var playerW       = SPRITES.PLAYER_STRAIGHT.w * SPRITES.SCALE;
-        var speedPercent  = speed/maxSpeed;
+        lightSpeedMode    = keyLightSpeed && carNitro > 0 && !nitroReload
+        var speedPercent  = speed/(lightSpeedMode ? maxLightSpeed : maxSpeed);
         var dx            = dt * 2 * speedPercent; // at top speed, should be able to cross from left to right (-1 to 1) in 1 second
         var startPosition = position;
+
+        if (carNitro < maxNitro)
+          fillNitro();
 
         updateCars(dt, playerSegment, playerW);
 
@@ -175,16 +182,8 @@
         
         playerX = playerX - (dx * speedPercent * playerSegment.curve * centrifugal);
 
-        if (nitroReload) {
-          if (carNitro < maxNitro && speed >= segmentLength/(step/1.25) - 5 && speed <= segmentLength/(step/1.25) + 5) {
-            carNitro = carNitro + parseInt(speed / 15000);
-            updateHud('nitro', carNitro);
-          }
-           else {
-            nitroReload = false;
-          }
-        }
-        
+
+
         var nitro = document.getElementById('nitro_slider');
         nitro.style.cssText += 'width:' + carNitro + '%;';
         
@@ -202,19 +201,17 @@
         var speedometer = document.getElementById('speed_slider');
         speedometer.style.cssText += 'transform: rotate(' + parseInt(3 + (speed * 84 / maxSpeed)) + 'deg);';
 
+
+
         if (keyFaster){
-          if (keyLightSpeed && carNitro > 0 && !nitroReload) {
-            speed = Util.accelerate(speed, lightSpeed, dt);
-            --carNitro;
-            updateHud('nitro', carNitro);
-          } else if (carNitro == 0 && speed >= segmentLength/(step/1.25)) {
-            speed = Util.accelerate(speed, breaking, dt);
+          if (lightSpeedMode) {
+            useNitro();
+            speed = Util.accelerate(speed, (carNitro == 0 ? accel : lightSpeed), dt);
           } else if (keyHandBreak) {
             speed = Util.accelerate(speed, handBreak, dt);
           } else {
             speed = Util.accelerate(speed, accel, dt);
-            if (carNitro == 0) nitroReload = true;
-          }
+          } 
         } else if (keySlower) {
           speed = Util.accelerate(speed, breaking, dt);
         }  else if (keyHandBreak) {
@@ -233,7 +230,7 @@
             sprite  = playerSegment.sprites[n];
             spriteW = sprite.source.w * SPRITES.SCALE;
             if (Util.overlap(playerX, playerW, sprite.offset + spriteW/2 * (sprite.offset > 0 ? 1 : -1), spriteW)) {
-              speed = maxSpeed/5;
+              speed = (lightSpeedMode ? maxLightSpeed : maxSpeed)/5;
               position = Util.increase(playerSegment.p1.world.z, -playerZ, trackLength); // stop in front of sprite (at front of segment)
               break;
             }
@@ -252,7 +249,9 @@
           }
         }
 
-        playerX    = Util.limit(playerX, -3, 3);  // dont ever let it go too far out of bounds
+        playerX = Util.limit(playerX, -3, 3);     // dont ever let it go too far out of bounds
+        speed   = Util.limit(speed, 0, (lightSpeedMode ? maxLightSpeed : maxSpeed)); // or exceed maxSpeed
+
         skyOffset  = Util.increase(skyOffset,  skySpeed  * playerSegment.curve * (position-startPosition)/segmentLength, 1);
         hillOffset = Util.increase(hillOffset, hillSpeed * playerSegment.curve * (position-startPosition)/segmentLength, 1);
         treeOffset = Util.increase(treeOffset, treeSpeed * playerSegment.curve * (position-startPosition)/segmentLength, 1);
@@ -284,6 +283,27 @@
       }
 
       //-------------------------------------------------------------------------
+
+      function fillNitro() {
+        if (last_lap_time < 20) {
+          nitroReload = true;
+        } else {
+          if (fillingNitroCounter == 10) {
+            updateHud('nitro', ++carNitro);
+            if (carNitro > minNitro)
+              nitroReload = false;
+
+            fillingNitroCounter = 0;
+          }
+          fillingNitroCounter++;
+        }
+      }
+
+      function useNitro() {
+        updateHud('nitro', --carNitro);
+        if (carNitro == 0)
+          nitroReload = true;
+      }
 
       function updateCars(dt, playerSegment, playerW) {
         var n, car, oldSegment, newSegment;
@@ -445,7 +465,7 @@
                           speed * (keyLeft ? -1 : keyRight ? 1 : 0),
                           playerSegment.p2.world.y - playerSegment.p1.world.y,
                           keyHandBreak,
-                          keyLightSpeed && !nitroReload);
+                          lightSpeedMode);
           }
         }
       }
