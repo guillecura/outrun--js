@@ -18,6 +18,18 @@
   --backlot-dark:  #e6b10d;
   --backlot-light: #fece35;
   
+  --green:         #0a7b5d;
+  --green-dark:    #03543f;
+  --green-light:   #16a17c;
+
+  --alert:         #dd2b2b;
+  --alert-dark:    #c42626;
+  --alert-light:   #dd4b4b;
+  --success:       #38bf2c;
+  --success-dark:  #31a626;
+  --success-light: #4ecc43;
+  --background:    #ede096;
+  
   --topbar:        4px;
   --bottombar:     80px;
   --hud:           24vh;
@@ -33,7 +45,7 @@
 /***************************************************************/
 @font-face {
     font-family: 'PressStart2P';
-    src: url('fonts/PressStart2P.ttf');
+    src: url('../fonts/PressStart2P.ttf');
 }
 
 * {
@@ -46,6 +58,7 @@ body,
 html {
   background-color: var(--black-light);
   font-family: Arial, Helvetica, sans-serif;
+  min-height: calc(var(--bottombar) * 6);
   overflow: hidden;
 }
 
@@ -74,6 +87,7 @@ html {
 }
 /* Content */
 #content {
+  background-color: var(--black-light);
   height: calc(100vh - var(--bottombar) - var(--topbar));
   width: 100%;
   z-index: 0;
@@ -83,12 +97,13 @@ html {
   height: 100%;
   position: relative;
   width: fit-content;
+  max-width: 100%;
 }
 #content #racer {
   z-index: 0;
 }
 #content #canvas {
-  background-color: var(--black);
+  background-color: var(--background);
   object-fit: contain;
   z-index: 0;
 }
@@ -118,6 +133,90 @@ html {
   width: 100%;
   z-index: 1;
 }
+/* Nitro */
+#hud #nitro {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  height: var(--hud-smaller);
+  justify-content: center;
+  left: 0;
+  overflow: hidden;
+  position: absolute;
+  text-align: left;
+  top: 0;
+  width: var(--hud);
+}
+#hud #nitro .value {
+  border: var(--border) solid var(--smoke-dark);
+  border-radius: var(--border);
+  box-shadow: 0 0 var(--distance) rgba(0, 0, 0, 0.5);
+  color: var(--white);
+  display: block;
+  height: var(--icon);
+  left: var(--distance);
+  line-height: var(--distance);
+  padding: var(--border);
+  position: absolute;
+  text-align: right;
+  text-shadow: 0 0 var(--border) var(--black);
+  top: calc(50% - var(--icon) / 2);
+  width: calc(100% - var(--distance) * 2);
+  z-index: 1;
+}
+#hud #nitro #nitro_slider_container {
+  display: block;
+  left: var(--distance);
+  position: absolute;
+  top: calc(50% - var(--icon) / 2);
+  width: calc(100% - var(--distance) * 2 - var(--border) * 4);
+  z-index: 0;
+}
+#hud #nitro #nitro_slider {
+  background-color: var(--success);
+  display: block;
+  height: var(--distance);
+  left: calc(var(--border) * 2);
+  position: absolute;
+  top: calc(var(--border) * 2);
+  transition: width 200ms ease;
+}
+#hud #nitro #nitro_slider.alert {
+  background-color: var(--alert);
+}
+#hud #nitro #nitro_slider.warning {
+  background-color: var(--backlot);
+}
+#hud #nitro #nitro_slider::before,
+#hud #nitro #nitro_slider::after {
+  content: '';
+  display: block;
+  height: var(--border);
+  left: 0;
+  position: absolute;
+  width: 100%;
+  transition: width 200ms ease;
+}
+#hud #nitro #nitro_slider::before {
+  background-color: var(--success-light);
+  top: 0;
+}
+#hud #nitro #nitro_slider::after {
+  background-color: var(--success-dark);
+  bottom: 0;
+}
+#hud #nitro #nitro_slider.alert::before {
+  background-color: var(--alert-light);
+}
+#hud #nitro #nitro_slider.alert::after {
+  background-color: var(--alert-dark);
+}
+#hud #nitro #nitro_slider.warning::before {
+  background-color: var(--backlot-light);
+}
+#hud #nitro #nitro_slider.warning::after {
+  background-color: var(--backlot-dark);
+}
 /* Speedometer */
 #hud #speed {
   align-items: center;
@@ -146,10 +245,11 @@ html {
 #hud #speed::after {
   border-left: var(--border) dashed var(--white);
   border-radius: 100%;
-  border-top: var(--border) dashed var(--backlot);
+  border-top: var(--border) dashed var(--alert-dark);
   content: '';
   height: calc(200% - var(--distance) * 2);
   left: var(--distance);
+  opacity: 0.25;
   position: absolute;
   top: var(--distance);
   width: calc(200% - var(--distance) * 2);
@@ -173,6 +273,28 @@ html {
   position: absolute;
   right: var(--distance);
 }
+#hud #speed #speed_slider {
+  bottom: 0;
+  display: block;
+  height: 0;
+  position: absolute;
+  right: 0;
+  transform-origin: bottom right;
+  width: var(--hud);
+  z-index: -1;
+}
+#hud #speed #speed_slider::before{
+  border-bottom: 8px solid transparent;
+  border-left: var(--distance) solid transparent;
+  border-right: var(--hud) solid var(--alert);
+  border-top: 8px solid transparent;
+  bottom: -8px;
+  content: '';
+  display: block;
+  right: 0;
+  position: absolute;
+  width: 0;
+}
 /* Lap Time */
 #hud #current_lap_time {
   align-items: center;
@@ -194,14 +316,14 @@ html {
 /* Laps */
 #hud #lap_time {
   align-items: center;
+  bottom: 0;
   display: flex;
   flex-direction: column;
   height: var(--hud-smaller);
   justify-content: center;
+  left: 0;
   overflow: hidden;
   position: absolute;
-  left: 0;
-  bottom: 0;
   text-align: left;
   width: var(--hud-larger);
 }
@@ -267,6 +389,10 @@ html {
   color: var(--smoke-dark);
   width: 100%;
 }
+/* Options */
+#controls {
+  display: none;
+}
 /* FPS */
 #fps-box {
   align-items: center;
@@ -297,14 +423,14 @@ html {
 #fps-box #msText {
   color: var(--grey);
   font-size: 10px;
-  margin: 4px;
+  margin: var(--border);
   text-align: center;
   width: 100%;
 }
 #fps-box #fpsGraph,
 #fps-box #msGraph {
   background-color: var(--grey-dark);
-  height: var(--icon);
+  height: var(--distance);
   margin: 0;
   position: relative;
   width: 100%;
@@ -313,8 +439,6 @@ html {
 #fps-box #msGraph > span {
   background-color: var(--black-light);
   float: left;
-  height: var(--icon);
+  height: var(--distance);
   width: 1px;
 }
-
-#lanes, #controls { display: none; }

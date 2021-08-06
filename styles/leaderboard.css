@@ -1,48 +1,24 @@
 /*--------------------
-Body
---------------------*/
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-body {
-  min-height: 450px;
-  height: 100vh;
-  margin: 0;
-  background: radial-gradient(ellipse farthest-corner at center top, #000 0%, #f4f4f4 100%);
-  color: #fff;
-  font-family: "Open Sans", sans-serif;
-}
-
-/*--------------------
 Leaderboard
 --------------------*/
 .leaderboard {
   position: absolute;
-  top: 20%;
-  right: 0;
-  transform: translate(-30%, -50%);
+  top: 12vh;
+  left: var(--distance);
   width: 285px;
   height: 308px;
-  background: linear-gradient(to bottom, #3a404d, #181c26);
-  border-radius: 10px;
-  box-shadow: 0 7px 30px rgba(62, 9, 11, 0.3);
+  background: linear-gradient(rgba(0, 0, 0, 0.6) 0%, transparent 80%);
+  border-radius: 4px;
+  width: calc(var(--hud) - var(--distance) * 2);
 }
+
 .leaderboard h1 {
-  font-size: 18px;
-  color: #e1e1e1;
-  padding: 12px 13px 18px;
+  font-size: 1.5vh;
+  color: var(--smoke-dark);
+  padding: var(--distance);
+  text-align: center;
 }
-.leaderboard h1 svg {
-  width: 25px;
-  height: 26px;
-  position: relative;
-  top: 3px;
-  margin-right: 6px;
-  vertical-align: baseline;
-}
+
 .leaderboard ol {
   counter-reset: leaderboard;
   list-style-type: none;
@@ -150,5 +126,3 @@ Leaderboard
 .the-most img {
   max-width: 100%;
 }
-
-/*# sourceMappingURL=leaderboard.css.map */
